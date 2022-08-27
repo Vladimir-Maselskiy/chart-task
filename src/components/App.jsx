@@ -1,17 +1,23 @@
 import { useState, useEffect, useRef } from 'react';
+import axios from 'axios';
+import { Box } from './Box/Box';
 import Filter from './Filter/Filter';
 import ContactList from './ContactList/ContactList';
-// import Message from './CurrentContact/CurrentContact';
-import { Box } from './Box/Box';
-import axios from 'axios';
 import { Anonymous } from './Anonymous/Anonymous';
+import { getVisibleContacts } from 'utils/getVisibleContacts';
+import { CurrentContact } from './CurrentContact/CurrentContact';
+import { setCurrentContactByID } from 'utils/setCurrentContactByID';
+import { MessageCreator } from './MessageCreator/MessageCreator';
+import { Messages } from './Messages/Messages';
+import { WellcomeMessage } from './WellcomeMessage/WellcomeMessage';
 
 export function App() {
   const emptyArray = useRef(true);
   const [data, setData] = useState([]);
   const [contacts, setContacts] = useState([]);
-  // // const [filter, setFilter] = useState('');
-  // const [currentContact, setCurrentContact] = useState(null);
+  const [visibleСontacts, setVisibleСontacts] = useState([]);
+  const [filter, setFilter] = useState('');
+  const [currentContact, setCurrentContact] = useState({});
 
   useEffect(() => {
     axios
@@ -38,60 +44,76 @@ export function App() {
     }
   }, [data, emptyArray]);
 
-  // useEffect(() => {
-  //   if (contacts.length > 0) {
-  //     localStorage.setItem('contacts', JSON.stringify(contacts));
-  //   }
-  //   setCurrentContact(contacts[0]);
-  // }, [contacts]);
+  useEffect(() => {
+    setVisibleСontacts(getVisibleContacts(contacts, filter));
+  }, [contacts, filter]);
 
-  // useEffect(() => {
-  //   if (currentContact) {
-  //     setContacts(prevState => {
-  //       return [
-  //         currentContact,
-  //         ...prevState.filter(item => {
-  //           return item.id !== currentContact.id;
-  //         }),
-  //       ];
-  //     });
-  //   }
-  // }, [currentContact]);
+  useEffect(() => {
+    if (currentContact.id) {
+      setCurrentContact(
+        contacts.find(contact => contact.id === currentContact.id)
+      );
+    }
+  }, [contacts, currentContact.id]);
 
-  // const changeInput = name => {
-  //   setFilter(name);
-  // };
-
-  // const onChangeInput = () =>
-  //   contacts.filter(item =>
-  //     item.name.toLocaleLowerCase().includes(filter.toLocaleLowerCase())
-  //   );
-
-  // const onContactClick = contact => {
-  //   setCurrentContact(contact);
-  // };
+  const onContactClick = id => {
+    setCurrentContact(setCurrentContactByID(contacts, id));
+  };
 
   return (
-    contacts.length > 0 && (
-      <Box display="flex" width={1} flexDirection="row">
-        <Box width={1 / 3}>
-          <Box height={120}>
-            <Anonymous />
-            <Filter />
-          </Box>
-          {/* // onClick={changeInput}
-          /> */}
-          <ContactList contacts={contacts} />
-        </Box>
-        {/* <Box>
-          {currentContact && (
-            <Message
-              currentContact={currentContact}
-              setCurrentContact={setCurrentContact}
+    <Box display="flex" height="100vh" width="100vw">
+      {contacts.length > 0 && (
+        <Box display="flex" width={1} flexDirection="row">
+          <Box
+            display="flex"
+            flexDirection="column"
+            width={1 / 3}
+            minWidth="170px"
+            borderRight="1px solid #ccc"
+          >
+            <Box
+              minHeight={140}
+              p={20}
+              display="flex"
+              flexDirection="column"
+              justifyContent="space-between"
+              bg="#f5f5f5"
+              borderBottom="1px solid #ccc"
+            >
+              <Anonymous />
+              <Filter setFilter={setFilter} />
+            </Box>
+            <ContactList
+              contacts={visibleСontacts}
+              onContactClick={onContactClick}
             />
-          )}
-        </Box> */}
-      </Box>
-    )
+          </Box>
+          <Box
+            position="relative"
+            display="flex"
+            flexDirection="column"
+            justifyContent="space-between"
+            height="100%"
+            width="100%"
+          >
+            {currentContact.id ? (
+              <CurrentContact currentContact={currentContact}></CurrentContact>
+            ) : (
+              <WellcomeMessage />
+            )}
+            {currentContact.messages && (
+              <Messages currentContact={currentContact} />
+            )}
+            {currentContact.id && (
+              <MessageCreator
+                currentContact={currentContact}
+                setCurrentContact={setCurrentContact}
+                setContacts={setContacts}
+              ></MessageCreator>
+            )}
+          </Box>
+        </Box>
+      )}
+    </Box>
   );
 }

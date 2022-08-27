@@ -1,5 +1,6 @@
 import { Box } from 'components/Box/Box';
 import { ContactItem } from '../ContactItem/ContactItem';
+import { ContactListStyled } from './ContactList.styled';
 
 export default function ContactList({ contacts, onContactClick }) {
   return (
@@ -9,20 +10,20 @@ export default function ContactList({ contacts, onContactClick }) {
         display="flex"
         alignItems="center"
         pl="10px"
-        color="#63a2c2"
+        color="#4e9fc5"
       >
         <h2>Chats</h2>
       </Box>
 
-      <ul>
+      <ContactListStyled>
         {contacts.map(contact => (
           <ContactItem
             key={contact.id}
-            onClick={onContactClick}
+            onContactClick={onContactClick}
             contact={contact}
           />
         ))}
-      </ul>
+      </ContactListStyled>
     </>
   );
 }
