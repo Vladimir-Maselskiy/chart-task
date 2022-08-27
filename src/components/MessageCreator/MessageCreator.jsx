@@ -1,6 +1,5 @@
 import axios from 'axios';
 import { nanoid } from 'nanoid';
-import moment from 'moment';
 import { Box } from 'components/Box/Box';
 
 import {
@@ -12,14 +11,13 @@ import {
 
 export const MessageCreator = ({ currentContact, setContacts }) => {
   const onSubmit = evt => {
-    console.log(moment(Date.now()).format('MMMM Do YYYY'));
     evt.preventDefault();
     const outgoingMessage = evt.target.elements.name.value;
     if (outgoingMessage === '') return;
     const outgoingMessageObj = {
       id: nanoid(),
       type: 'outgoing',
-      createdAT: moment(Date.now()).format('MM/DD/YY LT'),
+      createdAT: Date.now(),
       value: outgoingMessage,
     };
 
@@ -36,11 +34,10 @@ export const MessageCreator = ({ currentContact, setContacts }) => {
 
     axios.get('https://api.chucknorris.io/jokes/random').then(resp => {
       const { id, value } = resp.data;
-      console.log(resp);
       const incomingMessageObj = {
         id,
         type: 'incoming',
-        createdAT: moment(Date.now()).format('MM/DD/YY LT'),
+        createdAT: Date.now(),
         value,
       };
       setContacts(prevState => {

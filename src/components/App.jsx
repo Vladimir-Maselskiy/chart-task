@@ -56,6 +56,16 @@ export function App() {
     }
   }, [contacts, currentContact.id]);
 
+  useEffect(() => {
+    if (contacts.length > 1) {
+      contacts.sort((a, b) => {
+        const a1 = a.messages[a.messages.length - 1]?.createdAT || 0;
+        const b1 = b.messages[b.messages.length - 1]?.createdAT || 0;
+        return b1 - a1;
+      });
+    }
+  }, [contacts]);
+
   const onContactClick = id => {
     setCurrentContact(setCurrentContactByID(contacts, id));
   };

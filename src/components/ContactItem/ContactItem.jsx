@@ -1,4 +1,5 @@
 import { Box } from 'components/Box/Box';
+import { TimeOfLastMessage } from 'components/TimeOfLastMessage/TimeOfLastMessage';
 import {
   AiOutlineCheckCircleStyled,
   ContactItemStyled,
@@ -6,7 +7,7 @@ import {
 } from './ContactItem.styled';
 
 export const ContactItem = ({
-  contact: { id, createdAt, name, avatar },
+  contact: { id, name, avatar, messages },
   onContactClick,
 }) => {
   return (
@@ -22,8 +23,22 @@ export const ContactItem = ({
         <AiOutlineCheckCircleStyled />
       </Box>
 
-      <Box ml="20px">
+      <Box
+        ml="20px"
+        display="flex"
+        flexDirection="column"
+        justifyContent="center"
+        height={50}
+      >
         <p>{name}</p>
+        {messages.length > 0 && (
+          <Box maxHeight={20} overflow="hidden" color="#767676">
+            {messages[messages.length - 1].value}
+          </Box>
+        )}
+      </Box>
+      <Box ml="auto">
+        <TimeOfLastMessage messages={messages} />
       </Box>
     </ContactItemStyled>
   );
