@@ -5,38 +5,8 @@ import {
 } from 'components/ContactItem/ContactItem.styled';
 
 export const CurrentContact = ({
-  currentContact: { id, createdAt, name, avatar } = {},
-  setCurrentContact,
+  currentContact: { id, name, avatar } = {},
 }) => {
-  // const [newMessage, setNewMessage] = useState('');
-
-  // function onSubmit(evt) {
-  //   evt.preventDefault();
-  //   const currentMessage = evt.target.elements[0].value;
-  //   setCurrentContact(prevState => {
-  //     return {
-  //       ...prevState,
-  //       messages: [...prevState.messages, currentMessage],
-  //     };
-  //   });
-  //   // currentContact.messages.push(currentMessage);
-  //   setNewMessage(currentMessage);
-  //   evt.target.reset();
-  // }
-
-  // useEffect(() => {
-  //   if (newMessage) {
-  //     fetchMessage().then(data => {
-  //       setCurrentContact(prevState => {
-  //         return {
-  //           ...prevState,
-  //           messages: [...prevState.messages, data.value],
-  //         };
-  //       });
-  //     });
-  //   }
-  // }, [newMessage, setCurrentContact]);
-
   return (
     id && (
       <Box

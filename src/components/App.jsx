@@ -10,6 +10,7 @@ import { setCurrentContactByID } from 'utils/setCurrentContactByID';
 import { MessageCreator } from './MessageCreator/MessageCreator';
 import { Messages } from './Messages/Messages';
 import { WellcomeMessage } from './WellcomeMessage/WellcomeMessage';
+import GoogleLogin from 'react-google-login';
 
 export function App() {
   const emptyArray = useRef(true);
@@ -70,6 +71,15 @@ export function App() {
     setCurrentContact(setCurrentContactByID(contacts, id));
   };
 
+  const responseGoogleonFailure = resp => {
+    alert('DDDD');
+    alert(resp, 'AAAA');
+  };
+
+  const responseGoogleonSuccess = resp => {
+    console.log(resp);
+  };
+
   return (
     <Box display="flex" height="100vh" width="100vw">
       {contacts.length > 0 && (
@@ -91,6 +101,14 @@ export function App() {
               borderBottom="1px solid #ccc"
             >
               <Anonymous />
+              <GoogleLogin
+                clientId="141257002444-3jn6k1q7gtq95d2cjbuo32iusbjh4vah.apps.googleusercontent.com"
+                buttonText="Login"
+                onSuccess={responseGoogleonSuccess}
+                onFailure={responseGoogleonFailure}
+                cookiePolicy={'single_host_origin'}
+              />
+              ,
               <Filter setFilter={setFilter} />
             </Box>
             <ContactList
