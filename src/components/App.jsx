@@ -10,7 +10,12 @@ import { setCurrentContactByID } from 'utils/setCurrentContactByID';
 import { MessageCreator } from './MessageCreator/MessageCreator';
 import { Messages } from './Messages/Messages';
 import { WellcomeMessage } from './WellcomeMessage/WellcomeMessage';
-import GoogleLogin from 'react-google-login';
+import { GoogleLogin, GoogleLogout } from 'react-google-login';
+import { gapi } from 'gapi-script';
+import { IoLogInOutline, IoLogOutOutline } from 'react-icons/io5';
+import { GoogleButtonStyled } from './MessageCreator/MessageCreator.styled';
+import { UserLogIn } from './UserLogIn/UserLogIn';
+import { sortContacts } from 'utils/sortContacts';
 
 export function App() {
   const emptyArray = useRef(true);
@@ -19,12 +24,15 @@ export function App() {
   const [visibleСontacts, setVisibleСontacts] = useState([]);
   const [filter, setFilter] = useState('');
   const [currentContact, setCurrentContact] = useState({});
+  const [userLogin, setUserLogin] = useState(null);
+  const isSorted = useRef(false);
 
   useEffect(() => {
     axios
       .get('https://62e66c32de23e263792c05a8.mockapi.io/contacts')
       .then(resp => {
         setData(resp.data);
+        sortContacts(resp.data, setData, isSorted);
       });
   }, []);
 
@@ -43,7 +51,7 @@ export function App() {
         emptyArray.current = false;
       }
     }
-  }, [data, emptyArray]);
+  }, [data, emptyArray, contacts]);
 
   useEffect(() => {
     setVisibleСontacts(getVisibleContacts(contacts, filter));
@@ -57,13 +65,13 @@ export function App() {
     }
   }, [contacts, currentContact.id]);
 
+  const setRefValue = value => {
+    isSorted.current = value;
+  };
+
   useEffect(() => {
-    if (contacts.length > 1) {
-      contacts.sort((a, b) => {
-        const a1 = a.messages[a.messages.length - 1]?.createdAT || 0;
-        const b1 = b.messages[b.messages.length - 1]?.createdAT || 0;
-        return b1 - a1;
-      });
+    if (!isSorted.current) {
+      sortContacts(contacts, setContacts, setRefValue);
     }
   }, [contacts]);
 
@@ -71,14 +79,30 @@ export function App() {
     setCurrentContact(setCurrentContactByID(contacts, id));
   };
 
-  const responseGoogleonFailure = resp => {
-    alert('DDDD');
-    alert(resp, 'AAAA');
+  const clientId =
+    '141257002444-3jn6k1q7gtq95d2cjbuo32iusbjh4vah.apps.googleusercontent.com';
+
+  const responseGoogleonFailure = () => {
+    console.log('Error');
   };
 
   const responseGoogleonSuccess = resp => {
-    console.log(resp);
+    setUserLogin(resp.wt);
   };
+
+  const logOut = () => {
+    setUserLogin(null);
+  };
+
+  useEffect(() => {
+    const initClient = () => {
+      gapi.client.init({
+        clientId: clientId,
+        scope: '',
+      });
+    };
+    gapi.load('client:auth2', initClient);
+  });
 
   return (
     <Box display="flex" height="100vh" width="100vw">
@@ -92,23 +116,53 @@ export function App() {
             borderRight="1px solid #ccc"
           >
             <Box
+              display="flex"
+              justifyContent="space-between"
               minHeight={140}
               p={20}
-              display="flex"
               flexDirection="column"
-              justifyContent="space-between"
               bg="#f5f5f5"
               borderBottom="1px solid #ccc"
             >
-              <Anonymous />
-              <GoogleLogin
-                clientId="141257002444-3jn6k1q7gtq95d2cjbuo32iusbjh4vah.apps.googleusercontent.com"
-                buttonText="Login"
-                onSuccess={responseGoogleonSuccess}
-                onFailure={responseGoogleonFailure}
-                cookiePolicy={'single_host_origin'}
-              />
-              ,
+              <Box display="flex" justifyContent="space-between">
+                {userLogin ? (
+                  <UserLogIn userLogin={userLogin} />
+                ) : (
+                  <Anonymous />
+                )}
+                {userLogin ? (
+                  <GoogleLogout
+                    clientId={clientId}
+                    buttonText="Log out"
+                    onLogoutSuccess={logOut}
+                    render={renderProps => (
+                      <GoogleButtonStyled
+                        onClick={renderProps.onClick}
+                        disabled={renderProps.disabled}
+                      >
+                        <IoLogOutOutline size={40} color="#767676" />
+                      </GoogleButtonStyled>
+                    )}
+                  />
+                ) : (
+                  <GoogleLogin
+                    clientId="141257002444-3jn6k1q7gtq95d2cjbuo32iusbjh4vah.apps.googleusercontent.com"
+                    render={renderProps => (
+                      <GoogleButtonStyled
+                        onClick={renderProps.onClick}
+                        disabled={renderProps.disabled}
+                      >
+                        <IoLogInOutline size={40} color="#767676" />
+                      </GoogleButtonStyled>
+                    )}
+                    onSuccess={responseGoogleonSuccess}
+                    onFailure={responseGoogleonFailure}
+                    cookiePolicy={'single_host_origin'}
+                    isSignedIn={true}
+                  />
+                )}
+              </Box>
+
               <Filter setFilter={setFilter} />
             </Box>
             <ContactList
@@ -134,8 +188,8 @@ export function App() {
             )}
             {currentContact.id && (
               <MessageCreator
+                setRefValue={setRefValue}
                 currentContact={currentContact}
-                setCurrentContact={setCurrentContact}
                 setContacts={setContacts}
               ></MessageCreator>
             )}

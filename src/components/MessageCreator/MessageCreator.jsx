@@ -9,7 +9,11 @@ import {
   MdOutlineSendStyled,
 } from './MessageCreator.styled';
 
-export const MessageCreator = ({ currentContact, setContacts }) => {
+export const MessageCreator = ({
+  currentContact,
+  setContacts,
+  setRefValue,
+}) => {
   const onSubmit = evt => {
     evt.preventDefault();
     const outgoingMessage = evt.target.elements.name.value;
@@ -20,16 +24,24 @@ export const MessageCreator = ({ currentContact, setContacts }) => {
       createdAT: Date.now(),
       value: outgoingMessage,
     };
-
+    setRefValue(false);
     setContacts(prevState => {
-      return prevState.map(contact =>
-        contact.id === currentContact.id
-          ? {
+      return prevState.map(contact => {
+        if (contact.id === currentContact.id) {
+          axios.put(
+            `https://62e66c32de23e263792c05a8.mockapi.io/contacts/${contact.id}`,
+            {
               ...contact,
               messages: [...contact.messages, outgoingMessageObj],
             }
-          : contact
-      );
+          );
+          return {
+            ...contact,
+            messages: [...contact.messages, outgoingMessageObj],
+          };
+        }
+        return contact;
+      });
     });
 
     axios.get('https://api.chucknorris.io/jokes/random').then(resp => {
@@ -40,16 +52,27 @@ export const MessageCreator = ({ currentContact, setContacts }) => {
         createdAT: Date.now(),
         value,
       };
-      setContacts(prevState => {
-        return prevState.map(contact =>
-          contact.id === currentContact.id
-            ? {
+      setTimeout(() => {
+        setRefValue(false);
+        setContacts(prevState => {
+          return prevState.map(contact => {
+            if (contact.id === currentContact.id) {
+              axios.put(
+                `https://62e66c32de23e263792c05a8.mockapi.io/contacts/${contact.id}`,
+                {
+                  ...contact,
+                  messages: [...contact.messages, incomingMessageObj],
+                }
+              );
+              return {
                 ...contact,
                 messages: [...contact.messages, incomingMessageObj],
-              }
-            : contact
-        );
-      });
+              };
+            }
+            return contact;
+          });
+        });
+      }, 5000 + Math.random() * 50);
     });
     evt.target.reset();
   };

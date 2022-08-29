@@ -27,6 +27,13 @@ export const ButtonStyled = styled.button`
   border: none;
   background-color: transparent;
 `;
+export const GoogleButtonStyled = styled.button`
+  border: none;
+  background-color: transparent;
+  :hover {
+    cursor: pointer;
+  }
+`;
 
 export const MdOutlineSendStyled = styled(MdOutlineSend)`
   color: #767676;
