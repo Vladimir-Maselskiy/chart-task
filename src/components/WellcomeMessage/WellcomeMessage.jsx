@@ -13,7 +13,7 @@ export const WellcomeMessage = () => {
       padding="10px"
       bg="#f5f5f5"
     >
-      Wellcome! Click by any contantact and start chating
+      Wellcome! Click by any contact and start chating
     </Box>
   );
 };
